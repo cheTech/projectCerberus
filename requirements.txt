@@ -1,0 +1,6 @@
+opencv-python
+face_recognition
+requests
+playsound
+threading
+psycopg2
