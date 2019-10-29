@@ -129,3 +129,5 @@ settings.json
 *.sublime-project
 
 *.jpg
+
+utilities/
