@@ -1,5 +1,5 @@
 """
-Main script. 
+Main script.
 
 Author: cheTech 
 GitHub: https://github.com/cheTech/projectCerberus
@@ -31,7 +31,7 @@ except Exception as e:
         "table_name_groups":""
     },
         "texttospeech Keys":{
-        "Yandex SpeechKit Api":""
+        "Yandex SpeechKit Api":"",
         "Google TTS Api":"",
         "Path to local":"",
         "Path to mp3 cache":"temp.mp3"

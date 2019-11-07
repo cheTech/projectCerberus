@@ -4,7 +4,7 @@ Identification Api.
 Author: cheTech
 GitHub: https://github.com/cheTech/projectCerberus
 
-Documentation: 
+Documentation:
 """
 
 from cv2 import VideoCapture, imshow, waitKey, rectangle
@@ -51,23 +51,32 @@ class identify_Api(object):
                 # определить положение лиц в кадре
                 face_locations = face_recognition.face_locations(frame)
 
-                if len(face_locations) > 0:
+                if face_locations:
                     # определить encoding лиц
                     face_encodings = face_recognition.face_encodings(frame, face_locations)
-                    #
-                    for face_encoding in face_encodings:
+
+                    for (top, right, bottom, left), face_encoding in zip(face_locations, face_encodings):
+                        # for face_encoding in face_encodings:
                         #
                         name = "Unknown"
                         #
-                        compared_face = face_recognition.compare_faces(self.encodings, face_encoding, tolerance=0.60)
-                        #
-                        print(str(compared_face))
+                        '''
+                        print(1, self.encodings)
+                        print(2, type(self.encodings))
+                        print(3, face_encoding)
+                        print(4, type(face_encoding))
+                        exit()
+                        '''
 
-                    # обработка положений лиц
-                    for (t, r, b, l) in face_locations:
-                        points = [(l, t), (r, b)]  # x, y текущего лица
-                        # выделить лицо прямоугольником
-                        rectangle(frame, points[0], points[1], (0, 255, 0), 2)
+                        compared_face = face_recognition.compare_faces(self.encodings, face_encoding, tolerance=0.60)
+                        print(compared_face)
+                        #
+
+                # обработка положений лиц
+                for (t, r, b, l) in face_locations:
+                    points = [(l, t), (r, b)]  # x, y текущего лица
+                    # выделить лицо прямоугольником
+                    rectangle(frame, points[0], points[1], (0, 255, 0), 2)
 
                 imshow("Camera", frame)  # вывод кадра в окно
 

@@ -24,8 +24,8 @@ class CerberusApplication(object):
 
         self.tts = texttospeech_Api(settings["texttospeech Keys"])
 
-        self.identify = identify_Api(people_data=[
-                                     self.face_encodings, self.face_names], ttsObj=self.tts, identifyOptions=settings["Identify Settings"])
+        self.identify = identify_Api(people_data=[self.face_names,
+                                                  self.face_encodings], ttsObj=self.tts, identifyOptions=settings["Identify Settings"])
         self.web = web_Api(settings["Web Api Settings"], dbObj=self.db)
 
         print("CerberusApplication: OK!")

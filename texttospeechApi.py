@@ -9,7 +9,7 @@ Documentation:
 
 import requests
 from playsound import playsound
-from multiprocessing import Process
+from threading import Thread
 from time import sleep
 import json
 
@@ -23,10 +23,6 @@ class texttospeech_Api(object):
         self.googlekey = keys["Google TTS Api"]
         self.pathtolocal = keys["Path to local"]
         self.pathtotmp = keys["Path to mp3 cache"]
-
-        json.dump([], open("temp", "w"))
-
-        self.voiceLoopProcess = Process(target=self.__voiceLoop)
 
         print("texttospeech_Api: OK!")
 
@@ -55,36 +51,20 @@ class texttospeech_Api(object):
         return False  # срабатывает, если что-то идет не так
 
     def say(self, text, engine="yandex"):  # добавить фразу в очередь на синтез
-        with open("temp", "r") as f:
-            speechQuery = json.loads(f.read())
-        speechQuery.append([text, engine])
-        with open("temp", "w") as f:
-            f.write(json.dumps(speechQuery))
-
-    def __voiceLoop(self):  # цикл обрабатывающий очередь на синтез речи
-        while True:
-            with open("temp", "r") as f:
-                speechQuery = json.loads(f.read())
-            if len(speechQuery) > 0:  # если очередь не пустая
-                for text, engine in speechQuery:
-                    self.__say(text=text, engine=engine)
-                speechQuery = []  # обнулить очередь
-            with open("temp", "w") as f:
-                f.write(json.dumps(speechQuery))
-            sleep(0.1)
+        Thread(target=self.__say, args=(text, engine)).run()
 
     def run(self):  # запуск цикла
         print("texttospeech_Api: Running...")
 
-        self.voiceLoopProcess.start()
+        # self.voiceLoopProcess.start()
 
         print("texttospeech_Api: OK!")
 
     def stop(self):
         print("texttospeech_Api: Stopping...")
 
-        self.voiceLoopProcess.terminate()
-        self.voiceLoopProcess.join()
+        # self.voiceLoopProcess.terminate()
+        # self.voiceLoopProcess.join()
 
         print("texttospeech_Api: OK!")
 

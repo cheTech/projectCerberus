@@ -58,11 +58,13 @@ class database_Api(object):
         dataEncodings = []
 
         for encoding in dbData:
-            dataEncodings.append(np.array(json.loads(encoding[0])))
+            enc = np.array(json.loads(encoding[0]))
+            dataEncodings.append(enc)
+            print(enc)
+            print(enc.shape)
+            print(type(enc))
 
-        dataEncodings = np.array(dataEncodings).reshape((128))
-
-        print(dataEncodings.shape)
+        print(dataEncodings)
 
         return dataEncodings
 
