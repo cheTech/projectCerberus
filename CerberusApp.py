@@ -19,13 +19,9 @@ class CerberusApplication(object):
 
         self.db = database_Api(settings["Database Credentials"])
 
-        self.face_encodings = self.db.getEncodings()
-        self.face_names = self.db.getNames()
-
         self.tts = texttospeech_Api(settings["texttospeech Keys"])
 
-        self.identify = identify_Api(people_data=[self.face_names,
-                                                  self.face_encodings], ttsObj=self.tts, identifyOptions=settings["Identify Settings"])
+        self.identify = identify_Api(dbObj=self.db, ttsObj=self.tts, identifyOptions=settings["Identify Settings"])
         self.web = web_Api(settings["Web Api Settings"], dbObj=self.db)
 
         print("CerberusApplication: OK!")
@@ -34,13 +30,14 @@ class CerberusApplication(object):
         print("CerberusApplication: Running...")
 
         self.web.run()
-        self.identify.run()
         self.tts.run()
+        self.identify.run()
 
         print("CerberusApplication: OK!")
 
         while True:
-            if not self.identify.identifyActive:
+            open("CerberusProjectStatus.txt", "r").read()
+            if open("CerberusProjectStatus.txt", "r").read() == "0":
                 self.stop()
                 break
 

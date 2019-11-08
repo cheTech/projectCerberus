@@ -9,7 +9,7 @@ Documentation:
 
 import requests
 from playsound import playsound
-from threading import Thread
+from multiprocessing import Process
 from time import sleep
 import json
 
@@ -51,7 +51,7 @@ class texttospeech_Api(object):
         return False  # срабатывает, если что-то идет не так
 
     def say(self, text, engine="yandex"):  # добавить фразу в очередь на синтез
-        Thread(target=self.__say, args=(text, engine)).run()
+        Process(target=self.__say, args=(text, engine)).run()
 
     def run(self):  # запуск цикла
         print("texttospeech_Api: Running...")

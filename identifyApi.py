@@ -7,18 +7,20 @@ GitHub: https://github.com/cheTech/projectCerberus
 Documentation:
 """
 
-from cv2 import VideoCapture, imshow, waitKey, rectangle
 from time import sleep
 from multiprocessing import Process
 import face_recognition
+import cv2
 import logging
 import json
 
 
 class identify_Api(object):
 
-    def __init__(self, people_data, ttsObj, identifyOptions={"cameraid": 0}):
+    def __init__(self, dbObj, ttsObj, identifyOptions={"cameraid": 0}):
         print("identify_Api: Started init...")
+
+        open("CerberusProjectStatus.txt", "w").write("1")
 
         self.texttospeech = ttsObj
 
@@ -26,10 +28,7 @@ class identify_Api(object):
 
         self.texttospeech = ttsObj
 
-        # self.camera = VideoCapture(
-        #    self.identifyOptions["cameraid"])  # инициализация камеры
-
-        self.camera = VideoCapture(self.identifyOptions["cameraid"])
+        self.camera = cv2.VideoCapture(self.identifyOptions["cameraid"])
 
         self.camera.set(3, identifyOptions["res"][0])
         self.camera.set(4, identifyOptions["res"][1])
@@ -38,13 +37,49 @@ class identify_Api(object):
 
         self.identifyActive = True
 
-        self.names, self.encodings = people_data
+        self.frameCounter = 0
+        self.lastDetected = []
+
+        self.db = dbObj
+
+        self.names, self.encodings = self.db.getNames(), self.db.getEncodings()
 
         print("identify_Api: OK!")
+
+    def __processMatch(self, match):
+        name_data = match
+
+        if name_data["id"] > 0:
+
+            greeting = name_data["pref"]
+
+            if greeting == '':
+                greeting = "Привет"
+
+            name = name_data["name"].split(" ")
+
+            self.texttospeech.say("%s %s" % (greeting, name[0]))
+
+            return True
+
+        else:
+            print("Unknown Detected")
+
+    def __processCompareFaces(self, face_compare, names):
+        for i in range(len(face_compare)):
+            if face_compare[i]:
+                return names[i]
+        return names[0]
 
     def identify(self):
         self.texttospeech.say("Проект Цербер успешно запущен!")
         while True:
+            if self.frameCounter > 30:
+                self.lastDetected = []
+                self.frameCounter = 0
+            else:
+                self.frameCounter += 1
+
             ret, frame = self.camera.read()  # Чтение кадра и состояния камеры
             if ret:  # Если состояние камеры True (все исправно работает)
 
@@ -56,33 +91,28 @@ class identify_Api(object):
                     face_encodings = face_recognition.face_encodings(frame, face_locations)
 
                     for (top, right, bottom, left), face_encoding in zip(face_locations, face_encodings):
-                        # for face_encoding in face_encodings:
-                        #
                         name = "Unknown"
-                        #
-                        '''
-                        print(1, self.encodings)
-                        print(2, type(self.encodings))
-                        print(3, face_encoding)
-                        print(4, type(face_encoding))
-                        exit()
-                        '''
 
-                        compared_face = face_recognition.compare_faces(self.encodings, face_encoding, tolerance=0.60)
-                        print(compared_face)
-                        #
+                        face_compare = face_recognition.compare_faces(self.encodings, face_encoding, tolerance=0.60)
 
-                # обработка положений лиц
-                for (t, r, b, l) in face_locations:
-                    points = [(l, t), (r, b)]  # x, y текущего лица
-                    # выделить лицо прямоугольником
-                    rectangle(frame, points[0], points[1], (0, 255, 0), 2)
+                        points = [(left, top), (right, bottom)]  # x, y текущего лица
+                        # выделить лицо прямоугольником
+                        cv2.rectangle(frame, points[0], points[1], (0, 255, 0), 2)
 
-                imshow("Camera", frame)  # вывод кадра в окно
+                        match = self.__processCompareFaces(face_compare, self.names)
 
-                key = waitKey(1) & 0xFF  # Обработка нажатия
+                        if self.lastDetected.count(match["id"]) < 1:
+                            self.__processMatch(match)
+
+                            self.lastDetected.append(match["id"])
+
+                cv2.imshow("Camera", frame)  # вывод кадра в окно
+
+                key = cv2.waitKey(1) & 0xFF  # Обработка нажатия
                 if key == ord("q"):  # кнопки q
                     self.identifyActive = False
+                    open("CerberusProjectStatus.txt", "w").write("0")
+                    print("quit request")
                     # break  # выход из цикла -> программы
 
             else:  # Если камера не работает

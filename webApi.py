@@ -10,6 +10,7 @@ Documentation:
 from multiprocessing import Process
 from flask import Flask, request
 import json
+import os
 
 
 class web_Api(object):
@@ -26,7 +27,7 @@ class web_Api(object):
         self.appProcess = Process(target=self.__run)
 
         @self.app.route("/api/getUsers", methods=["GET"])  # change to POST
-        def api_getUsers():
+        def api_getUsers(self):
             try:
                 usersFullData = self.db.getNames()
             except:
@@ -49,10 +50,14 @@ class web_Api(object):
 
             return json.dumps(usersData)
 
+        @self.app.route("/addNew")
+        def addNew():
+            return render_template("addNew.html")
+
         print("web_Api: OK!")
 
     def __run(self):
-        self.app.run(host=self.host)  # , port=self.port, debug=True)
+        self.app.run(host=self.host, debug=True)  # , port=self.port, debug=True)
 
     def run(self):
         print("web_Api: Running...")

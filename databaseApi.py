@@ -25,11 +25,18 @@ class database_Api(object):
         self.cursor = self.conn.cursor()
         print("database_Api: OK!")
 
-    def __decode(self, string):
-        decoded_string = base64.b64decode(string)
-        return pickle.loads(decoded_string)
+    def getInfo(self, identificator):
+        self.cursor.execute("SELECT id,name,groupid,deleted,photo,pref FROM %s WHERE id = %s" % (self.credentials["table_name_people"], identificator))
+        data = self.cursor.fetchall()[0]
 
-    def getNames(self):  # запрос имен
+        return {"id": data[0],
+                "name": data[1],
+                "groupid": data[2],
+                "deleted": data[3],
+                "photo": data[4],
+                "pref": data[5]}
+
+    def getNames(self, withDeleted=False):  # запрос имен
         # выполняем запрос по таблице с данными пользователей с сортировкой по
         # идентификатору
         self.cursor.execute("SELECT id,name,groupid,deleted,photo,pref FROM %s ORDER BY id" % (
@@ -39,12 +46,19 @@ class database_Api(object):
         dataNames = []
 
         for data in dbData:
-            dataNames.append({"id": data[0],
-                              "name": data[1],
-                              "groupid": data[2],
-                              "deleted": data[3],
-                              "photo": data[4],
-                              "pref": data[5]})
+            if withDeleted:
+                dataNames.append({"id": data[0],
+                                  "name": data[1],
+                                  "groupid": data[2],
+                                  "deleted": data[3],
+                                  "photo": data[4],
+                                  "pref": data[5]})
+            else:
+                dataNames.append({"id": data[0],
+                                  "name": data[1],
+                                  "groupid": data[2],
+                                  "photo": data[4],
+                                  "pref": data[5]})
 
         return dataNames
 
@@ -60,11 +74,6 @@ class database_Api(object):
         for encoding in dbData:
             enc = np.array(json.loads(encoding[0]))
             dataEncodings.append(enc)
-            print(enc)
-            print(enc.shape)
-            print(type(enc))
-
-        print(dataEncodings)
 
         return dataEncodings
 
