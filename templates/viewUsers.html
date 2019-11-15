@@ -49,7 +49,7 @@
             </ul>
         </div>
     </nav>
-    <div class="modal fade" tabindex="-1" role="dialog" aria-labelledby="exampleModalLongTitle" aria-hidden="true" id="alert-modal"> </div>
+    <div id="modal-window"></div>
     <div class="container">
         <div id="users-list" class="row">
         </div>
@@ -62,11 +62,15 @@
     <script src="/static/js/bootStrapAlert.js"></script>
     <script type="text/javascript">
         ModalUserDelete = function(userid) {
-            $('#alert-modal').html('<div class="modal-dialog" role="document"> <div class="modal-content"> <div class="modal-header">  <button type="button" class="close" data-dismiss="modal" aria-label="Close"> <span aria-hidden="true">&times;</span> </button> </div> <div class="modal-body">Удалить пользователя <b>' + Users[userid]["name"] + '</b>? </div> <div class="modal-footer"> <button type="button" class="btn btn-danger" data-dismiss="modal">Нет</button><button type="button" class="btn btn-success" data-dismiss="modal" onclick="deleteUser(' + Users[userid]["id"] + ')">Да</button> </div> </div> </div>');
+            $('#modal-window').html('<div class="modal fade" tabindex="-1" role="dialog" aria-labelledby="exampleModalLongTitle" aria-hidden="true" id="alert-modal"><div class="modal-dialog" role="document"> <div class="modal-content"> <div class="modal-header">  <button type="button" class="close" data-dismiss="modal" aria-label="Close"> <span aria-hidden="true">&times;</span> </button> </div> <div class="modal-body">Удалить пользователя <b>' + Users[userid]["name"] + '</b>? </div> <div class="modal-footer"> <button type="button" class="btn btn-danger" data-dismiss="modal">Нет</button><button type="button" class="btn btn-success" data-dismiss="modal" onclick="deleteUser(' + Users[userid]["id"] + ')">Да</button> </div> </div>  </div></div>');
             $('#alert-modal').modal('show');
         }
         ModalUserChange = function(userid) {
-            $('#alert-modal').html('<div class="modal-dialog" role="document"> <div class="modal-content"> <div class="modal-header"> <button type="button" class="close" data-dismiss="modal" aria-label="Закрыть"> <span aria-hidden="true">&times;</span> </button> </div> <div class="modal-body"> <input class="form-control" type="text" width="20" placeholder="Имя" id="name-in"> <br> <select class="form-control" id="kvant-in" width="20"> <option>Выберите квантум</option> <option value="IT">IT</option> <option value="Промдизайн">Промдизайн</option> </select> <br> <select class="form-control" id="day-in" width="20"> <option>Выберите день недели</option> <option value="0">Понедельник</option> <option value="1">Вторник</option> <option value="2">Среда</option> <option value="3">Четверг</option> <option value="4">Пятница</option> </select> <br> <select class="form-control" id="time-in" width="20"> <option>Выберите время</option> </select> </div> <div class="modal-footer"> <button type="button" class="btn btn-danger" data-dismiss="modal">Закрыть</button> <button id="send-btn" class="btn btn-success" onclick="changeUser(' + Users[userid]["id"] + ')">Сохранить</button> </div> </div></div>');
+            $('#modal-window').html('<div class="modal fade" tabindex="-1" role="dialog" aria-labelledby="exampleModalLongTitle" aria-hidden="true" id="alert-modal"><div class="modal-dialog" role="document"> <div class="modal-content"> <div class="modal-header"> <button type="button" class="close" data-dismiss="modal" aria-label="Закрыть"> <span aria-hidden="true">&times;</span> </button> </div> <div class="modal-body"> <input class="form-control" type="text" width="20" placeholder="Имя" id="name-in"> <br> <select class="form-control" id="kvant-in" width="20"> <option>Выберите квантум</option> <option value="IT">IT</option> <option value="Промдизайн">Промдизайн</option> </select> <br> <select class="form-control" id="day-in" width="20"> <option>Выберите день недели</option> <option value="0">Понедельник</option> <option value="1">Вторник</option> <option value="2">Среда</option> <option value="3">Четверг</option> <option value="4">Пятница</option> </select> <br> <select class="form-control" id="time-in" width="20"> <option>Выберите время</option> </select> </div> <div class="modal-footer"> <button type="button" class="btn btn-danger" data-dismiss="modal">Закрыть</button> <button id="send-btn" class="btn btn-success" onclick="changeUser(' + Users[userid]["id"] + ')">Сохранить</button> </div> </div> </div></div>');
+            $('#alert-modal').modal('show');
+            
+            $("#day-in").on('change', timeResfresh);
+            $("#kvant-in").on('change', timeResfresh);
 
             group = Groups[Users[userid]["groupid"]];
             $("#name-in").val(Users[userid]["name"]);
@@ -76,11 +80,14 @@
             $('#alert-modal').modal('show');
         }
 
-        changeUser = function(){
+        changeUser = function(userid){
             name = $("#name-in");
-            kvant = $("#kvant-in");
-            day = $("#day-in");
-            time = $("#time-in");
+            surname = $("#surname-in");
+            groupid = $("#time-in");
+            pref = $("#pref-in");
+
+            db.changeUser(userid,name,surname,groupid,pref);
+
         }
 
         deleteUser = function(userid){
@@ -92,7 +99,7 @@
         renderUsers = function(){
             htmlcont = "";
             for (i = 1; i < Users.length; i++) {
-                htmlcont += ' <div class="col-md-3"> <div class="card"> <img class="card-img-top" src="/' + Users[i]["photo"] + '"> <div class="card-body"> <h3 class="card-title">' + Users[i]["name"] + '</h3> <span class="badge badge-success">' + Users[i]["prefix"] + '</span> </div> <div class="card-footer"> <div class="dropdown"> <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> Действия </button> <div class="dropdown-menu" aria-labelledby="dropdownMenuButton"> <button type="button" onclick="ModalUserChange(' + Users[i]["id"] + ')" class="btn btn-info">Изменить</button> <button type="button" onclick="ModalUserDelete(' + Users[i]["id"] + ')" class="btn btn-danger">Удалить</button> </div> </div> </div> </div> </div>';
+                htmlcont += ' <div class="col-md-3"> <div class="card"> <img class="card-img-top" src="/' + Users[i]["photo"] + '"> <div class="card-body"> <h3 class="card-title">' + Users[i]["name"] + '</h3> <span class="badge badge-success">' + Users[i]["pref"] + '</span> </div> <div class="card-footer"> <div class="dropdown"> <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> Действия </button> <div class="dropdown-menu" aria-labelledby="dropdownMenuButton"> <button type="button" onclick="ModalUserChange(' + i + ')" class="btn btn-info">Изменить</button> <button type="button" onclick="ModalUserDelete(' + i+ ')" class="btn btn-danger">Удалить</button> </div> </div> </div> </div> </div>';
             }
             $("#users-list").html(htmlcont);
         }

@@ -1,7 +1,8 @@
+var daysofweek = ["Понедельник","Вторник","Среда","Четверг","Пятница","Суббота","Воскресенье"];
 var xhr = new XMLHttpRequest();
 xhr.open("GET", "/api/getGroups", false);
-xhr.send()
-var data = JSON.parse(xhr.responseText);
+xhr.send();
+data = JSON.parse(xhr.responseText);
 if (xhr.status == 200){
     if (data["status"] == "ok") {
         var Groups = data["items"];
@@ -13,8 +14,8 @@ if (xhr.status == 200){
 }
 
 xhr.open("GET", "/api/getUsers", false);
-xhr.send()  
-var data = JSON.parse(xhr.responseText);
+xhr.send();
+data = JSON.parse(xhr.responseText);
 if (xhr.status == 200){
     if (data["status"] == "ok") {
         var Users = data["items"];
@@ -28,7 +29,7 @@ if (xhr.status == 200){
 var Teachers = [];
 for (i=1;i<Users.length;i++){
     user = Users[i];
-    if(Groups[user["groupid"]]["ownerid"]==0){
+    if(Groups[user["groupid"]]["ownerid"]===0){
         Teachers.push(user);
     }
 }
@@ -54,6 +55,25 @@ setOwnerID = function(userid){
     $("#ownerid-in").val(userid);
     $("#selected-user").html("Выбран пользователь: <b>"+Users[userid]["name"]+"</b>.");
     $("#alert-modal").modal('toggle');
+}
+
+var timeResfresh = function() {
+    htmlcont = "";
+    kvantVal = $("#kvant-in").val();
+    dayVal = $("#day-in").val();
+    matchGroups = $.grep(Groups, function(n, i) {
+        return n.kvant === kvantVal & n.dayofweek === parseInt(dayVal);
+    });
+    if (matchGroups.length == 0) {
+        htmlcont += "<option value='-1'>Групп в этот день не найдено!</option>";
+    } else {
+        htmlcont += "<option>Выберите время</option>";
+    }
+    for (i = 0; i < matchGroups.length; i++) {
+        group = matchGroups[i];
+        htmlcont += "<option value='" + group["id"] + "'>" + group["time"] + " (Наставник: " + Users[group["ownerid"]]["name"] + ")</option>";
+    }
+    $("#time-in").html(htmlcont);
 }
 
 db = function(){}
@@ -85,7 +105,7 @@ db.deleteGroup = function(groupid) {
     if(xhr.status == 200){
         data = JSON.parse(xhr.responseText);
         if (data["status"] == "ok") {
-            bootstrap_alert.warning("Группа " + userid + " успешно удален!"); 
+            bootstrap_alert.warning("Группа " + groupid + " успешно удалена!"); 
         } else {
             bootstrap_alert.warning("Произошла ошибка при удалении " + data["error"]["reason"]);
         }
@@ -115,6 +135,67 @@ db.addGroup = function(time,ownerid,dayofweek,cab){
         bootstrap_alert.warning("Произошла ошибка при добавлении группы в базу '" + xhr.status + "'");
     }
 }
-db.addUser = function(){}
-db.changeGroup = function(){}
-db.changeUser = function(){}
+db.addUser = function(name,surname,groupid,photo){
+    requestData = JSON.stringify({
+        name: name,
+        surname: surname,
+        groupid: groupid,
+        photo: photo
+    });
+    xhr.open("POST", "/api/addUser", false);
+    xhr.send(requestData);
+    if (xhr.status == 200){
+        data = JSON.parse(xhr.responseText);
+        if (data["status"] == "ok") {
+            bootstrap_alert.warning("Добавление пользователя в базу прошло успешно!");
+        } else {
+            bootstrap_alert.warning("Произошла ошибка при добавлении пользователя в базу '" + data["error"]["reason"] + "'");
+        }
+    } else {
+        bootstrap_alert.warning("Произошла ошибка при добавлении пользователя в базу '" + xhr.status + "'");
+    }
+
+}
+
+db.changeGroup = function(groupid,time,ownerid,dayofweek,cab){
+    requestData = JSON.stringify({
+        groupid: groupid,
+        time:time,
+        ownerid:ownerid,
+        dayofweek:dayofweek,
+        cab:cab
+    });
+    xhr.open("POST", "/api/changeGroup", false);
+    xhr.send(requestData);
+    if (xhr.status == 200){
+        data = JSON.parse(xhr.responseText);
+        if (data["status"] == "ok") {
+            bootstrap_alert.warning("Изменение данных группы прошло успешно!");
+        } else {
+            bootstrap_alert.warning("Произошла ошибка при изменении данных группы '" + data["error"]["reason"] + "'");
+        }
+    } else {
+        bootstrap_alert.warning("Произошла ошибка при изменении данных группы '" + xhr.status + "'");
+    }
+}
+db.changeUser = function(userid,name,surname,groupid,pref){
+    requestData = JSON.stringify({
+        userid:userid,
+        name:name,
+        surname:surname,
+        groupid:groupid,
+        pref:pref
+    });
+    xhr.open("POST", "/api/changeUser", false);
+    xhr.send(requestData);
+    if (xhr.status == 200){
+        data = JSON.parse(xhr.responseText);
+        if (data["status"] == "ok") {
+            bootstrap_alert.warning("Изменение данных пользователя прошло успешно!");
+        } else {
+            bootstrap_alert.warning("Произошла ошибка при изменении данных пользователя '" + data["error"]["reason"] + "'");
+        }
+    } else {
+        bootstrap_alert.warning("Произошла ошибка при изменении данных пользователя '" + xhr.status + "'");
+    }
+}

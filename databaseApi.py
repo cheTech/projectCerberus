@@ -28,6 +28,22 @@ class database_Api(object):
         self.cursor = self.conn.cursor()
         print("database_Api: OK!")
 
+    def changeUser(self, userid, name, groupid, pref):
+
+        self.cursor.execute("UPDATE %s SET name=%s, groupid=%s, pref=%s WHERE id=%s" % (self.credentials["table_name_people"], name, groupid, pref, userid))
+
+        self.conn.commit()
+
+        return True
+
+    def changeGroup(self, groupid, time, ownerid, dayofweek, cab):
+
+        self.cursor.execute("UPDATE %s SET time=%s, ownerid=%s, dayofweek=%s, cab=%s WHERE id=%s" % (self.credentials["table_name_groups"], time, ownerid, dayofweek, cab, groupid))
+
+        self.conn.commit()
+
+        return True
+
     def deleteUser(self, userid):
         self.cursor.execute("UPDATE %s SET deleted=1 WHERE id=%s" % (self.credentials["table_name_people"], userid))
 
@@ -42,8 +58,22 @@ class database_Api(object):
 
         return True
 
+    def restoreGroup(self, groupid):
+        self.cursor.execute("UPDATE %s SET deleted=0 WHERE id=%s" % (self.credentials["table_name_groups"], groupid))
+
+        self.conn.commit()
+
+        return True
+
+    def restoreUser(self, userid):
+        self.cursor.execute("UPDATE %s SET deleted=0 WHERE id=%s" % (self.credentials["table_name_people"], userid))
+
+        self.conn.commit()
+
+        return True
+
     def addUser(self, name, groupid, photopath, pref=""):
-        iden = int(self.getNames()[-1]["id"]) + 1
+        iden = int(self.getNames(withDeleted=True)[-1]["id"]) + 1
         deleted = 0
 
         newPhotoPath = "static/img/people/%s.jpg" % (iden)

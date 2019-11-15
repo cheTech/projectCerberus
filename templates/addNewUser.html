@@ -50,7 +50,7 @@
             </ul>
         </div>
     </nav>
-    <div class="modal fade" tabindex="-1" role="dialog" aria-labelledby="exampleModalLongTitle" aria-hidden="true" id="alert-modal"> </div>
+    <div id="modal-window"></div>
     <div class="container">
         <video id="video" height="480" autoplay></video>
         <button id="takePhoto-btn" class="btn btn-primary">Сделать фото</button>
@@ -94,45 +94,7 @@
     <script src="/static/js/databaseWork.js"></script>
     <script src="/static/js/bootStrapAlert.js"></script>
     <script type="text/javascript">
-        var daysofweek = ["Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота", "Воскресенье"];
-
-        var timeResfresh = function() {
-            if (responseData["status"] == "ok" & xhr.status == 200) {
-                groups = responseData["items"];
-                htmlcont = "";
-                kvantVal = $("#kvant-in").val();
-                dayVal = $("#day-in").val();
-                matchGroups = $.grep(groups, function(n, i) {
-                    return n.kvant === kvantVal & n.dayofweek === parseInt(dayVal);
-                });
-                if (matchGroups.length == 0) {
-                    htmlcont += "<option value='-1'>Групп в этот день не найдено!</option>";
-                } else {
-                    htmlcont += "<option>Выберите время</option>";
-                }
-                for (i = 0; i < matchGroups.length; i++) {
-                    group = matchGroups[i];
-                    htmlcont += "<option value='" + group["id"] + "'>" + group["time"] + " (Наставник: " + Users[group["ownerid"]]["name"] + ")</option>";
-                }
-                $("#time-in").html(htmlcont);
-            } else {
-                bootstrap_alert.warning("Произошла ошибка " + xhr.status + ":" + responseData["error"]["reason"]);
-            }
-        };
-
         $("#canvas").height(0);
-        bootstrap_alert = function() {}
-        bootstrap_alert.warning = function(message) {
-            $('#alert-modal').html('<div class="modal-dialog" role="document"> <div class="modal-content"> <div class="modal-header">  <button type="button" class="close" data-dismiss="modal" aria-label="Close"> <span aria-hidden="true">&times;</span> </button> </div> <div class="modal-body">' + message + ' </div> <div class="modal-footer"> <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button> </div> </div> </div>');
-            $('#alert-modal').modal('show');
-        }
-
-        var xhr = new XMLHttpRequest();
-
-        xhr.open("GET", "/api/getGroups", false);
-        xhr.send()
-        responseData = JSON.parse(xhr.responseText);
-
         $("#day-in").on('change', timeResfresh);
         $("#kvant-in").on('change', timeResfresh);
 
@@ -159,23 +121,13 @@
                 bootstrap_alert.warning("Вашей группы еще нет в базе!");
             } else {
                 photo = canvas.toDataURL('image/jpeg');
-                var requestData = JSON.stringify({
-                    name: $("#name-in").val(),
-                    surname: $("#surname-in").val(),
-                    groupid: $("#time-in").val(),
-                    photo: photo
-                });
-                xhr.open("POST", '/api/addUser', false)
-                xhr.setRequestHeader('Content-type', 'application/json; charset=utf-8');
-                xhr.send(requestData);
-                responseData = JSON.parse(xhr.responseText);
-                if (responseData["status"] == "ok" & xhr.status == 200) {
-                    bootstrap_alert.warning("Добавление в базу прошло успешно!");
-                } else {
-                    bootstrap_alert.warning("Произошла ошибка при добавлении в базу " + xhr.status + ":" + responseData["error"]["reason"]);
-                }
+                name = $("#name-in").val();
+                surname = $("#surname-in").val();
+                groupid = $("#time-in").val();
+                db.addUser(name,surname,groupid,photo);
             }
         })
+
     </script>
 </body>
 

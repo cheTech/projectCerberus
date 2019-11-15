@@ -17,20 +17,9 @@ from multiprocessing import Process
 import logging
 
 
-class BaseConfig(object):
-    DEBUG = False
-    TESTING = False
-    # sqlite :memory: identifier is the default if no filepath is present
-    SQLALCHEMY_DATABASE_URI = 'sqlite://'
-    SECRET_KEY = '1d94e52c-1c89-4515-b87a-f48cf3cb7f0b'
-    LOGGING_FORMAT = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-    LOGGING_LOCATION = 'flask.log'
-    LOGGING_LEVEL = logging.DEBUG
-
-
 class web_Api(object):
 
-    def __init__(self, params, dbObj):
+    def __init__(self, params, dbObj, handler):
         print("web_Api: Started init...")
 
         self.db = dbObj
@@ -39,16 +28,34 @@ class web_Api(object):
         self.port = params["port"]
 
         self.app = Flask(__name__)
-        handler = logging.FileHandler("flask.log")
-        handler.setLevel(logging.DEBUG)
-        formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-        handler.setFormatter(formatter)
         self.app.logger.addHandler(handler)
 
         @self.app.errorhandler(Exception)
         def unhandled_exception(e):
             self.app.logger.error('Unhandled Exception: %s', (e))
             return json.dumps({"status": "error", "error": {"reason": "Backend App Error"}}), 500
+
+        @self.app.route("/api/changeUser", methods=["POST"])  # change to POST
+        def api_changeUser():
+            requestData = json.loads(request.data)
+
+            try:
+                self.db.changeUser(userid=requestData["userid"], name=requestData["name"] + " " + requestData["surname"], groupid=requestData["groupid"], pref=requestData["pref"])
+            except:
+                return json.dumps({"status": "error", "error": {"reason": "DatabaseError"}})
+
+            return json.dumps({"status": "ok"})
+
+        @self.app.route("/api/changeUser", methods=["POST"])  # change to POST
+        def api_changeGroup():
+            requestData = json.loads(request.data)
+
+            try:
+                self.db.changeGroup(groupid=requestData["groupid"], time=requestData["time"], ownerid=requestData["ownerid"], dayofweek=requestData["dayofweek"], cab=requestData["cab"])
+            except:
+                return json.dumps({"status": "error", "error": {"reason": "DatabaseError"}})
+
+            return json.dumps({"status": "ok"})
 
         @self.app.route("/api/getUsers", methods=["GET"])  # change to POST
         def api_getUsers():
@@ -83,23 +90,9 @@ class web_Api(object):
 
             return json.dumps({"status": "ok", "items": groupsData})
 
-        @self.app.route("/api/getGroupInfo", methods=["GET"])  # change to POST
-        def api_getGroupInfo():
-            try:
-                groupId = int(request.args.get("groupId"))
-            except:
-                return json.dumps({"status": "error", "error": {"reason": "Bad groupId parameter!"}})
-
-            try:
-                data = self.db.getGroupInfo(groupId)
-            except:
-                return json.dumps({"status": "error", "error": {"reason": "Ошибка базы данных!"}})
-
-            return json.dumps({"status": "ok", "items": data})
-
         @self.app.route("/api/addUser", methods=["POST"])  # change to POST
         def api_addUser():
-            requestData = request.get_json()
+            requestData = json.loads(request.data)
 
             imagePath = "temp.jpg"
             fromBase64imgToFile(requestData["photo"], imagePath)
@@ -113,33 +106,43 @@ class web_Api(object):
             name = requestData["name"] + " " + requestData["surname"]
             groupid = requestData["groupid"]
 
-            self.db.addUser(name=name, groupid=groupid, photopath=imagePath)
+            try:
+                self.db.addUser(name=name, groupid=groupid, photopath=imagePath)
+            except:
+                return json.dumps({"status": "error", "error": {"reason": "DatabaseError"}})
 
             return json.dumps({"status": "ok"})
 
         @self.app.route("/api/addGroup", methods=["POST"])  # change to POST
         def api_addGroup():
-            #requestData = request.get_json()
             requestData = json.loads(request.data)
 
-            self.db.addGroup(kvant=requestData["kvant"], time=requestData["time"], ownerid=requestData["ownerid"], dayofweek=requestData["dayofweek"], cab=requestData["cab"])
+            try:
+                self.db.addGroup(kvant=requestData["kvant"], time=requestData["time"], ownerid=requestData["ownerid"], dayofweek=requestData["dayofweek"], cab=requestData["cab"])
+            except:
+                return json.dumps({"status": "error", "error": {"reason": "DatabaseError"}})
 
             return json.dumps({"status": "ok"})
 
         @self.app.route("/api/deleteUser", methods=["POST"])  # change to POST
         def api_deleteUser():
-            #requestData = request.get_json()
             requestData = json.loads(request.data)
 
-            self.db.deleteUser(requestData["userid"])
+            try:
+                self.db.deleteUser(requestData["userid"])
+            except:
+                return json.dumps({"status": "error", "error": {"reason": "DatabaseError"}})
 
             return json.dumps({"status": "ok"})
 
         @self.app.route("/api/deleteGroup", methods=["POST"])  # change to POST
         def api_deleteGroup():
-            requestData = request.get_json()
+            requestData = json.loads(request.data)
 
-            self.db.deleteGroup(requestData["groupid"])
+            try:
+                self.db.deleteGroup(requestData["groupid"])
+            except:
+                return json.dumps({"status": "error", "error": {"reason": "DatabaseError"}})
 
             return json.dumps({"status": "ok"})
 
@@ -168,8 +171,7 @@ class web_Api(object):
     def run(self):
         print("web_Api: Running...")
 
-        #Process(target=self.app.run, args=(self.host, self.port)).start()
-        self.app.run(host="0.0.0.0")
+        Process(target=self.app.run, args=(self.host, self.port)).start()
 
         print("web_Api: OK!")
 

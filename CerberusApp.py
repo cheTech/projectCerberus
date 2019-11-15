@@ -10,6 +10,7 @@ from texttospeechApi import texttospeech_Api
 from databaseApi import database_Api
 from identifyApi import identify_Api
 from webApi import web_Api
+import logging
 
 
 class CerberusApplication(object):
@@ -17,12 +18,17 @@ class CerberusApplication(object):
     def __init__(self, settings):
         print("CerberusApplication: Started init...")
 
+        handler = logging.FileHandler("project.log")
+        handler.setLevel(logging.DEBUG)
+        formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+        handler.setFormatter(formatter)
+
         self.db = database_Api(settings["Database Credentials"])
 
         self.tts = texttospeech_Api(settings["texttospeech Keys"])
 
         self.identify = identify_Api(dbObj=self.db, ttsObj=self.tts, identifyOptions=settings["Identify Settings"])
-        self.web = web_Api(settings["Web Api Settings"], dbObj=self.db)
+        self.web = web_Api(settings["Web Api Settings"], dbObj=self.db, handler=handler)
 
         print("CerberusApplication: OK!")
 
@@ -30,8 +36,8 @@ class CerberusApplication(object):
         print("CerberusApplication: Running...")
 
         self.web.run()
-        # self.tts.run()
-        # self.identify.run()
+        self.tts.run()
+        self.identify.run()
 
         print("CerberusApplication: OK!")
 
