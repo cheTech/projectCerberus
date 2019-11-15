@@ -9,6 +9,7 @@ Documentation:
 
 from time import sleep
 from multiprocessing import Process
+from threading import Thread
 import face_recognition
 import cv2
 import logging
@@ -33,7 +34,7 @@ class identify_Api(object):
         self.camera.set(3, identifyOptions["res"][0])
         self.camera.set(4, identifyOptions["res"][1])
 
-        self.identifyLoopProcess = Process(target=self.identify)
+        self.identifyLoopProcess = Thread(target=self.identify)
 
         self.identifyActive = True
 
@@ -93,13 +94,17 @@ class identify_Api(object):
                     for (top, right, bottom, left), face_encoding in zip(face_locations, face_encodings):
                         name = "Unknown"
 
-                        face_compare = face_recognition.compare_faces(self.encodings, face_encoding, tolerance=0.60)
+                        face_compare = face_recognition.compare_faces(self.encodings, face_encoding, tolerance=0.50)
 
                         points = [(left, top), (right, bottom)]  # x, y текущего лица
-                        # выделить лицо прямоугольником
-                        cv2.rectangle(frame, points[0], points[1], (0, 255, 0), 2)
 
                         match = self.__processCompareFaces(face_compare, self.names)
+
+                        # выделить лицо прямоугольником
+                        if match["id"] != 0:
+                            cv2.rectangle(frame, points[0], points[1], (0, 255, 0), 2)
+                        else:
+                            cv2.rectangle(frame, points[0], points[1], (0, 0, 255), 2)
 
                         if self.lastDetected.count(match["id"]) < 1:
                             self.__processMatch(match)

@@ -131,3 +131,9 @@ settings.json
 *.jpg
 
 utilities/
+
+temp
+
+requestdata.txt
+
+_sqlreq.txt

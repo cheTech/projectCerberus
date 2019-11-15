@@ -1,7 +1,7 @@
 """
 Main script.
 
-Author: cheTech 
+Author: cheTech
 GitHub: https://github.com/cheTech/projectCerberus
 
 Documentation:
@@ -12,7 +12,6 @@ https://docs.opencv.org/4.1.2/
 from CerberusApp import CerberusApplication
 import logging
 import json
-
 
 # инициализация записи лога
 logging.basicConfig(filename='main.log', level=logging.DEBUG)

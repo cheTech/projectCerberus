@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <title></title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/open-iconic/1.1.1/font/css/open-iconic-bootstrap.min.css" integrity="sha256-BJ/G+e+y7bQdrYkS2RBTyNfBHpA9IuGaPmf9htub5MQ=" crossorigin="anonymous" />
+    <link href="data:image/x-icon;base64,AAABAAEAEBAQAAEABAAoAQAAFgAAACgAAAAQAAAAIAAAAAEABAAAAAAAgAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAA/4QAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEREREREAAAERERERERAAERAAAAAAEQEQAAARAAABERAAABEAAAEREAAAEQAAAREQAAARAAABERAAABEAAAEREAAAEQAAAREQAAARAAABERAAAAAAAAEREAAAEQAAAREQAAARAAABEBEAAAAAABEAAREREREREAAAEREREREADgBwAAwAMAAI/5AAA+fAAAPnwAAD58AAA+fAAAPnwAAD58AAA+fAAAP/wAAD58AAA+fAAAn/kAAMADAADgBwAA" rel="icon" type="image/x-icon" />
+</head>
+
+<body>
+    <!-- Start your project here-->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav">
+                <li class="nav-item">
+                    <a class="nav-link" href="/dashboard">Панель управления</a>
+                </li>
+                <li class="nav-item">
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <span class="oi oi-plus" title="plus" aria-hidden="true"></span>
+                        </a>
+                        <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                            <a class="nav-link" href="/add/user">Пользователь</span></a>
+                            <a class="nav-link" href="/add/group">Группа</a>
+                        </div>
+                    </li>
+                </li>                <li class="nav-item">
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <span class="oi oi-eye" title="eye" aria-hidden="true"></span>
+                        </a>
+                        <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                            <a class="nav-link" href="/view/users">Пользователи</span></a>
+                            <a class="nav-link" href="/view/groups">Группы</a>
+                        </div>
+                    </li>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link disabled" href="#">Авторизоваться</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+    <div class="modal fade" tabindex="-1" role="dialog" aria-labelledby="exampleModalLongTitle" aria-hidden="true" id="alert-modal"> </div>
+    <div class="container">
+        <div id="users-list" class="row">
+        </div>
+    </div>
+    <!-- /Start your project here-->
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+    <script src="/static/js/databaseWork.js"></script>
+    <script src="/static/js/bootStrapAlert.js"></script>
+    <script type="text/javascript">
+        ModalUserDelete = function(userid) {
+            $('#alert-modal').html('<div class="modal-dialog" role="document"> <div class="modal-content"> <div class="modal-header">  <button type="button" class="close" data-dismiss="modal" aria-label="Close"> <span aria-hidden="true">&times;</span> </button> </div> <div class="modal-body">Удалить пользователя <b>' + Users[userid]["name"] + '</b>? </div> <div class="modal-footer"> <button type="button" class="btn btn-danger" data-dismiss="modal">Нет</button><button type="button" class="btn btn-success" data-dismiss="modal" onclick="deleteUser(' + Users[userid]["id"] + ')">Да</button> </div> </div> </div>');
+            $('#alert-modal').modal('show');
+        }
+        ModalUserChange = function(userid) {
+            $('#alert-modal').html('<div class="modal-dialog" role="document"> <div class="modal-content"> <div class="modal-header"> <button type="button" class="close" data-dismiss="modal" aria-label="Закрыть"> <span aria-hidden="true">&times;</span> </button> </div> <div class="modal-body"> <input class="form-control" type="text" width="20" placeholder="Имя" id="name-in"> <br> <select class="form-control" id="kvant-in" width="20"> <option>Выберите квантум</option> <option value="IT">IT</option> <option value="Промдизайн">Промдизайн</option> </select> <br> <select class="form-control" id="day-in" width="20"> <option>Выберите день недели</option> <option value="0">Понедельник</option> <option value="1">Вторник</option> <option value="2">Среда</option> <option value="3">Четверг</option> <option value="4">Пятница</option> </select> <br> <select class="form-control" id="time-in" width="20"> <option>Выберите время</option> </select> </div> <div class="modal-footer"> <button type="button" class="btn btn-danger" data-dismiss="modal">Закрыть</button> <button id="send-btn" class="btn btn-success" onclick="changeUser(' + Users[userid]["id"] + ')">Сохранить</button> </div> </div></div>');
+
+            group = Groups[Users[userid]["groupid"]];
+            $("#name-in").val(Users[userid]["name"]);
+            $("#kvant-in").val(group["kvant"]);
+            $("#day-in").val(group["dayofweek"]);
+            $("#time-in").val(group["id"]);
+            $('#alert-modal').modal('show');
+        }
+
+        changeUser = function(){
+            name = $("#name-in");
+            kvant = $("#kvant-in");
+            day = $("#day-in");
+            time = $("#time-in");
+        }
+
+        deleteUser = function(userid){
+            $('#alert-modal').modal('toggle');
+            db.deleteUser(userid);
+            renderUsers();
+        }
+
+        renderUsers = function(){
+            htmlcont = "";
+            for (i = 1; i < Users.length; i++) {
+                htmlcont += ' <div class="col-md-3"> <div class="card"> <img class="card-img-top" src="/' + Users[i]["photo"] + '"> <div class="card-body"> <h3 class="card-title">' + Users[i]["name"] + '</h3> <span class="badge badge-success">' + Users[i]["prefix"] + '</span> </div> <div class="card-footer"> <div class="dropdown"> <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> Действия </button> <div class="dropdown-menu" aria-labelledby="dropdownMenuButton"> <button type="button" onclick="ModalUserChange(' + Users[i]["id"] + ')" class="btn btn-info">Изменить</button> <button type="button" onclick="ModalUserDelete(' + Users[i]["id"] + ')" class="btn btn-danger">Удалить</button> </div> </div> </div> </div> </div>';
+            }
+            $("#users-list").html(htmlcont);
+        }
+        renderUsers();
+    </script>
+</body>
+
+</html>

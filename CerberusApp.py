@@ -30,8 +30,8 @@ class CerberusApplication(object):
         print("CerberusApplication: Running...")
 
         self.web.run()
-        self.tts.run()
-        self.identify.run()
+        # self.tts.run()
+        # self.identify.run()
 
         print("CerberusApplication: OK!")
 
@@ -46,8 +46,8 @@ class CerberusApplication(object):
         print("CerberusApplication: Stopping...")
 
         self.web.stop()
-        self.identify.stop()
         self.tts.stop()
+        self.identify.stop()
 
         print("CerberusApplication: OK!")
 
